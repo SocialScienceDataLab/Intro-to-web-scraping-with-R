@@ -20,7 +20,7 @@ library(streamR)
 
 ## directory --------------------
 
-wd <- ("./data/twitterApis")
+wd <- ("./twitterApis")
 dir.create(wd)
 setwd(wd)
 
@@ -40,8 +40,19 @@ setwd(wd)
 # 4. paste your consumer key and secret into the following code and execute it:
 
 
-## code ----------------------
+## store credentials in environment ------
+credentials <- c(
+  "twitter_api_key=rN3Td2zZADLWZBN9Pj7X2eBN",
+  "twitter_api_secret=abcqBpUzE7BQ65QJ6BRzpUzjyaRCfwn3ndrUUcqDWfhCN7Fj",
+  "twitter_access_token=9287465372-6ckQsXGP83eaXCsQHFQFx5pUNhmYYqknnCwWScVk8n7L",
+  "twitter_access_token_secret=ZHUxEW5fefntdyWBBB95fuXY5umZzWXdtPKtjUEP9GDcJs6w"
+)
+fname <- paste0(normalizePath("~/"),".Renviron")
+writeLines(credentials, fname)
 
+
+
+## store credentials in credential object ----------------------
 requestURL <- "https://api.twitter.com/oauth/request_token"
 accessURL <- "https://api.twitter.com/oauth/access_token"
 authURL <- "https://api.twitter.com/oauth/authorize"
@@ -67,7 +78,7 @@ setup_twitter_oauth(api_key,api_secret,access_token,access_token_secret)
 
 
 # search tweets on twitter
-tweets <- searchTwitter(searchString = "Pegida", n=25, lang=NULL, since=NULL, until=NULL, locale=NULL, geocode=NULL, sinceID=NULL, retryOnRateLimit=120)
+tweets <- searchTwitter(searchString = "Trump", n=25, lang=NULL, since=NULL, until=NULL, locale=NULL, geocode=NULL, sinceID=NULL, retryOnRateLimit=120)
 tweets_df <- twListToDF(tweets)
 head(tweets_df)
 names(tweets_df)
@@ -92,7 +103,7 @@ getCurRateLimitInfo()
 
 load("twitter_auth.RData")
 
-filterStream("tweets_stream.json", track = c("halligalli"), timeout = 10, oauth = twitCred)
+filterStream("tweets_stream.json", track = c("Trump"), timeout = 10, oauth = twitCred)
 tweets <- parseTweets("tweets_stream.json", simplify = TRUE)
 names(tweets)
 cat(tweets$text[1])

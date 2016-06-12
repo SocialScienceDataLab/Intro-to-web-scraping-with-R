@@ -27,7 +27,7 @@ library(d3Network) # visualizing networks
 
 ## directory --------------------
 
-wd <- ("./data/wikipediaPolsci")
+wd <- ("./wikipediaPolsci")
 dir.create(wd)
 setwd(wd)
 
@@ -40,7 +40,7 @@ browseURL(url)
 
 
 ## step 2: retrieve links
-html <- html(url)
+html <- read_html(url)
 anchors <- html_nodes(html, xpath="//a")
 length(anchors) # probably too many?
 
@@ -61,7 +61,6 @@ length(links)
 ##  step 3: extract names
 names <- html_attr(anchors, "title")[links_index]
 names <- str_replace(names, " \\(.*\\)", "")
-names <- iconv(names, "utf8", "latin1")
 
 
 ## step 4: fetch personal wiki pages
@@ -78,7 +77,7 @@ for ( i in seq_along(links) ){
   # download
   if ( !file.exists(fname) ) download.file(url, fname)
   # read in files
-  HTML[[i]] <- html(fname)
+  HTML[[i]] <- read_html(fname)
 }
 
 
