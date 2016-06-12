@@ -21,12 +21,13 @@
 
 library(stringr) # string processing
 library(rvest) # scraping suite
+library(pdftools) # get text out of PDFs
 library(ggmap) # geocoding
 
 
 ## directory ---------------------
 
-wd <- ("./data/ajpsReviewers")
+wd <- ("./ajpsReviewers")
 dir.create(wd)
 setwd(wd)
 
@@ -40,20 +41,21 @@ browseURL(url)
 
 ## step 2: retrieve pdfs
 # get page
-content <- html(url)
+content <- read_html(url)
 # get anchor (<a href=...>) nodes via xpath
 anchors <- html_nodes(content, xpath = "//a")
 # get value of anchors' href attribute
 hrefs <- html_attr(anchors, "href")
 
 # filter links to pdfs
-pdfs <- hrefs[ str_detect(hrefs, "reviewers.*\\d{4}.*pdf") ]
+pdfs <- hrefs[ str_detect(hrefs, "reviewer.*pdf") ]
 pdfs <- pdfs[!is.na(pdfs)]
 pdfs
 
 # define names for pdfs on disk
 pdf_names <- str_extract(pdfs, "\\d{4}.pdf")
 pdf_names
+pdf_names[1] <- "2015.pdf"
 
 # download pdfs
 for(i in seq_along(pdfs)) {
@@ -61,31 +63,17 @@ for(i in seq_along(pdfs)) {
 }
 
 
-## step 3: transform pdfs into txt data
-# xpdf: http://www.foolabs.com/xpdf/download.html
-# function working for windows ...
-# should use system() instead of shell() on Mac/Linux
-pdftotext <- function(fname){
-  path_to_pdftotext <-
-    "C:/xpdf/pdftotext.exe"
-  fname_txt <- str_replace(fname, ".pdf", ".txt")
-  command <- str_c(path_to_pdftotext,
-                   fname,
-                   fname_txt, sep=" ")
-  shell(command)
+## step 3: convert pdfs to raw txt
+for (i in seq_along(pdf_names)) {
+  pdftext <- pdf_text(pdf_names[i])
+  write(pdftext, file = paste0(str_extract(pdf_names[i], "[[:digit:]]{4}"), ".txt"))
 }
-
-pdftotext(pdf_names[1])
-pdftotext(pdf_names[2])
-pdftotext(pdf_names[3])
-pdftotext(pdf_names[4])
-pdftotext(pdf_names[5])
 
 
 ## step 4: import data 
 txt_names <- list.files(pattern = "txt")
 txt_names
-rawdat <- readLines(txt_names[4])
+rawdat <- readLines(txt_names[4]) # only reviewers from 2013
 head(rawdat)
 
 
@@ -110,7 +98,7 @@ institution <- rev13 %>%
               str_replace_all(pattern = " |\\(|^, ", replacement = " ") %>%
               str_trim
 head(institution)
-
+institution %>% table %>% sort
 
 reviews <- rev13 %>%
               str_extract("\\(.*") %>%
@@ -148,24 +136,3 @@ map <-
   theme_bw() +
   coord_map(xlim=c(-180, 180), ylim=c(-60,70))
 map
-
-
-## step 8: plot reviewers, germany
-url <-
-  "http://biogeo.ucdavis.edu/data/gadm2/R/DEU_adm1.RData"
-fname <- basename(url)
-if ( !file.exists(fname) ){
-  download.file(url, fname, mode="wb")
-}
-load(fname)
-
-map2 <-
-  ggplot(data=gadm, aes(x=long, y=lat)) +
-  geom_polygon(data = gadm, aes(group=group)) +
-  geom_path(color="white", aes(group=group)) +
-  geom_point(data = rev13_dat,
-             aes(x = lon, y = lat),
-             colour = "#F54B1A70", size=5, na.rm=T) +
-  coord_map(xlim=c(5, 16), ylim=c(47,55.5)) +
-  theme_bw()
-map2
