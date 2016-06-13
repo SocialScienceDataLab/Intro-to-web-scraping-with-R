@@ -1,4 +1,4 @@
-# Code and data for SSDL session "Three easy-to-learn tools to scrape data from the Web with R", June 15 2016
+## Code and data for SSDL session "Three easy-to-learn tools to scrape data from the Web with R", June 15 2016
 
 This repository contains code and data to implement basic scraping routines with *R*. In particular, the code shows how to
 
