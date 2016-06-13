@@ -25,5 +25,4 @@ To be able to run the code, follow these instructions:
 		install.packages(pkgs)
 
 * make sure Firefox is installed on your machine (available [here](https://www.google.com/chrome/browser/desktop/))
-
 * install Java from [here](https://www.java.com/de/download/))
